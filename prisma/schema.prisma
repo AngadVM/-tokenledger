@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum KeyStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum UsageStatus {
+  SUCCESS
+  BLOCKED_BUDGET
+  UPSTREAM_ERROR
+}
+
+model Team {
+  id           String        @id @default(cuid())
+  name         String
+  createdAt    DateTime      @default(now())
+  apiKeys      ApiKey[]
+  usageRecords UsageRecord[]
+}
+
+model ApiKey {
+  id               String      @id @default(cuid())
+  teamId           String
+  team             Team        @relation(fields: [teamId], references: [id])
+  label            String
+  hashedKey        String      @unique
+  prefix           String
+  status           KeyStatus   @default(ACTIVE)
+  monthlyBudgetUsd Decimal     @default(0) @db.Decimal(12, 4)
+  createdAt        DateTime    @default(now())
+  lastUsedAt       DateTime?
+  usageRecords     UsageRecord[]
+
+  @@index([teamId])
+}
+
+model UsageRecord {
+  id           String      @id @default(cuid())
+  requestId    String
+  teamId       String
+  team         Team        @relation(fields: [teamId], references: [id])
+  apiKeyId     String
+  apiKey       ApiKey      @relation(fields: [apiKeyId], references: [id])
+  model        String
+  inputTokens  Int
+  outputTokens Int
+  totalTokens  Int
+  costUsd      Decimal     @db.Decimal(18, 8)
+  latencyMs    Int
+  status       UsageStatus @default(SUCCESS)
+  createdAt    DateTime    @default(now())
+
+  @@index([teamId, createdAt])
+  @@index([apiKeyId, createdAt])
+}
+
+model PriceEntry {
+  id          String   @id @default(cuid())
+  model       String   @unique
+  provider    String
+  inputPer1k  Decimal  @db.Decimal(10, 8)
+  outputPer1k Decimal  @db.Decimal(10, 8)
+}
