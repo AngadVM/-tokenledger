@@ -6,6 +6,9 @@ import { RedisModule } from './redis/redis.module';
 import { PricingModule } from './pricing/pricing.module';
 import { TeamModule } from './teams/team.module';
 import { ApiKeyModule } from './api-keys/api-key.module';
+import { AuthModule } from './auth/auth.module';
+import { AdminModule } from './admin/admin.module';
+import { V1Module } from './v1/v1.module';
 import { HealthController } from './health/health.controller';
 
 @Module({
@@ -20,6 +23,9 @@ import { HealthController } from './health/health.controller';
     PricingModule,
     TeamModule,
     ApiKeyModule,
+    AuthModule,
+    AdminModule,
+    V1Module,
   ],
   controllers: [HealthController],
 })

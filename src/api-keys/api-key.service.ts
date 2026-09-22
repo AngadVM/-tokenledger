@@ -78,7 +78,9 @@ export class ApiKeyService {
     return this.prisma.apiKey.findUnique({ where: { hashedKey: hashKey(raw) } });
   }
 
-  async list(filter?: { teamId?: string }): Promise<ApiKey[]> {
+  async list(
+    filter?: { teamId?: string },
+  ): Promise<(ApiKey & { team: { name: string } | null })[]> {
     return this.prisma.apiKey.findMany({
       where: filter?.teamId ? { teamId: filter.teamId } : undefined,
       include: { team: { select: { name: true } } },
